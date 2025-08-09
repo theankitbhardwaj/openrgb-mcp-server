@@ -1,0 +1,6 @@
+server:
+  name: "OpenRGB MCP Server"
+  version: "0.0.1"
+openrgb:
+  host: "localhost"
+  port: 6742

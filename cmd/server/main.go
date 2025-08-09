@@ -1,9 +1,11 @@
 package main
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/theankitbhardwaj/openrgb-mcp-server/internal/app"
+	"github.com/theankitbhardwaj/openrgb-mcp-server/internal/mcp"
 	"github.com/theankitbhardwaj/openrgb-mcp-server/internal/openrgb"
 	"github.com/theankitbhardwaj/openrgb-mcp-server/pkg/util"
 )
@@ -26,5 +28,13 @@ func main() {
 
 	defer client.Close()
 
-	_ = app.NewService(client)
+	svc := app.NewService(client)
+
+	mcpServer := mcp.NewServer(cfg.Server.Name, cfg.Server.Version)
+
+	mcp.RegisterTools(mcpServer, svc)
+
+	if err := mcp.RunStdio(context.Background(), mcpServer); err != nil {
+		fmt.Printf("server runtime error: %v", err)
+	}
 }

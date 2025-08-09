@@ -1,8 +1,10 @@
 package main
 
 import (
+	"context"
 	"fmt"
 
+	"github.com/theankitbhardwaj/openrgb-mcp-server/internal/app"
 	"github.com/theankitbhardwaj/openrgb-mcp-server/internal/openrgb"
 	"github.com/theankitbhardwaj/openrgb-mcp-server/pkg/util"
 )
@@ -24,4 +26,8 @@ func main() {
 	}
 
 	defer client.Close()
+
+	svc := app.NewService(client)
+
+	svc.ListDevices(context.TODO())
 }

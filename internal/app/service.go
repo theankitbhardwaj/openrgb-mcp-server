@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/theankitbhardwaj/openrgb-mcp-server/internal/openrgb"
 )
@@ -37,4 +38,19 @@ func (s *Service) SetAllDevicesColor(ctx context.Context, r, g, b int) error {
 		return err
 	}
 	return s.rgbClient.SetAllDeviceColor(r, g, b)
+}
+
+func (s *Service) ListProfiles(ctx context.Context) ([]openrgb.Profile, error) {
+	profiles, err := s.rgbClient.ListProfiles()
+	if err != nil {
+		return nil, err
+	}
+	return profiles, nil
+}
+
+func (s *Service) SetProfile(ctx context.Context, profileName string) error {
+	if profileName == "" {
+		return fmt.Errorf("profile name cannot be empty")
+	}
+	return s.rgbClient.SetProfile(profileName)
 }

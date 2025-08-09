@@ -8,3 +8,7 @@ type DeviceInfo struct {
 	LEDCount    int      `json:"led_count"`
 	ModeNames   []string `json:"supported_modes"`
 }
+
+type Profile struct {
+	Name string `json:"name"`
+}

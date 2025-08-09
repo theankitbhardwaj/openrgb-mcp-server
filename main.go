@@ -16,10 +16,12 @@ func main() {
 		fmt.Println(err)
 	}
 
-	_, err = openrgb.ConnectClient(cfg.OpenRGB.Host, cfg.OpenRGB.Port) // client, err
+	client, err := openrgb.ConnectClient(cfg.OpenRGB.Host, cfg.OpenRGB.Port) // client, err
 
 	if err != nil {
 		fmt.Printf("Failed to connect to OpenRGB server: %v\n", err)
 		return
 	}
+
+	defer client.Close()
 }

@@ -18,8 +18,23 @@ func RegisterTools(server *mcp.Server, svc *app.Service) {
 		Name:        "set_device_color",
 		Description: "Set the color of a specific device",
 	}
+	setAllColor := &mcp.Tool{
+		Name:        "set_all_color",
+		Description: "Set the color of all devices",
+	}
+	listProfiles := &mcp.Tool{
+		Name:        "list_profiles",
+		Description: "List all saved profiles on OpenRGB",
+	}
+	setProfile := &mcp.Tool{
+		Name:        "set_profile",
+		Description: "Set the saved profile",
+	}
 	mcp.AddTool(server, listDevices, handleListDevices(svc))
 	mcp.AddTool(server, setDeviceColor, handleSetDeviceColor(svc))
+	mcp.AddTool(server, setAllColor, handleSetAllColor(svc))
+	mcp.AddTool(server, listProfiles, handleListProfiles(svc))
+	mcp.AddTool(server, setProfile, handleSetProfile(svc))
 }
 
 func handleListDevices(svc *app.Service) mcp.ToolHandlerFor[ListDevicesParams, []openrgb.DeviceInfo] {
@@ -50,13 +65,42 @@ func handleSetDeviceColor(svc *app.Service) mcp.ToolHandlerFor[SetDeviceColorPar
 	}
 }
 
-type ListDevicesParams struct {
-	// No parameters needed for listing devices
+func handleSetAllColor(svc *app.Service) mcp.ToolHandlerFor[SetAllColorParams, string] {
+	return func(ctx context.Context, ss *mcp.ServerSession, params *mcp.CallToolParamsFor[SetAllColorParams]) (*mcp.CallToolResultFor[string], error) {
+		err := svc.SetAllDevicesColor(ctx, params.Arguments.R, params.Arguments.G, params.Arguments.B)
+		if err != nil {
+			return nil, fmt.Errorf("failed to set device color: %w", err)
+		}
+
+		return &mcp.CallToolResultFor[string]{
+			Content: []mcp.Content{&mcp.TextContent{Text: "Successfully set color for devices"}},
+		}, nil
+	}
 }
 
-type SetDeviceColorParams struct {
-	DeviceID int `json:"device_id"`
-	R        int `json:"r"`
-	G        int `json:"g"`
-	B        int `json:"b"`
+func handleListProfiles(svc *app.Service) mcp.ToolHandlerFor[ListProfilesParams, []openrgb.Profile] {
+	return func(ctx context.Context, ss *mcp.ServerSession, params *mcp.CallToolParamsFor[ListProfilesParams]) (*mcp.CallToolResultFor[[]openrgb.Profile], error) {
+		profiles, err := svc.ListProfiles(ctx)
+		if err != nil {
+			return nil, err
+		}
+
+		return &mcp.CallToolResultFor[[]openrgb.Profile]{
+			Content:           []mcp.Content{&mcp.TextContent{Text: fmt.Sprintf("List of devices: %v", profiles)}},
+			StructuredContent: profiles,
+		}, nil
+	}
+}
+
+func handleSetProfile(svc *app.Service) mcp.ToolHandlerFor[SetProfileParams, string] {
+	return func(ctx context.Context, ss *mcp.ServerSession, params *mcp.CallToolParamsFor[SetProfileParams]) (*mcp.CallToolResultFor[string], error) {
+		err := svc.SetProfile(ctx, params.Arguments.ProfileName)
+		if err != nil {
+			return nil, fmt.Errorf("failed to set profile: %w", err)
+		}
+
+		return &mcp.CallToolResultFor[string]{
+			Content: []mcp.Content{&mcp.TextContent{Text: fmt.Sprintf("Successfully set profile: %v", params.Arguments.ProfileName)}},
+		}, nil
+	}
 }
